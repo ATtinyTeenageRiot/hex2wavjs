@@ -284,6 +284,10 @@ BootFrame.prototype.setProgCommand = function () {
 	this.command=2;
 };
 
+BootFrame.prototype.setEEPROMCommand = function () {
+	this.command=4;
+};
+
 
 BootFrame.prototype.setRunCommand = function () {
 	this.command=3;
@@ -436,6 +440,57 @@ WavCodeGenerator.prototype.makeTestCommand = function () {
 		this.frameSetup.setTestCommand();
 		this.frameSetup.addFrameParameters(frameData);
 		var signal=h2s.manchesterCoding(frameData);
+		return signal;
+};
+
+
+
+WavCodeGenerator.prototype.generateEEPROMSignal = function (data) {
+		var signal = [];
+		this.frameSetup.setEEPROMCommand(); // we want to programm the mc
+		var pageSize = this.frameSetup.getPageSize();
+		var data_length = data.length;
+		var sigPointer = 0;
+		var pagePointer = 0;
+		var data_length_to_send = 0;
+		
+		while(data_length > 0)
+		{
+			
+			if ((sigPointer + pageSize) > data_length) {
+				data_length_to_send = data_length - sigPointer; 
+			} else {
+				data_length_to_send = pageSize; 
+			}
+
+			this.frameSetup.setPageIndex(pagePointer++);
+			this.frameSetup.setTotalLength(data_length_to_send);
+
+			var partSig = new Array(pageSize);
+			
+			for(var n=0; n < pageSize; n++)
+			{
+				if(n+sigPointer > data.length-1) partSig[n]=0xFF;
+				else partSig[n] = data[n+sigPointer];
+			}
+
+			sigPointer += pageSize;			
+			data_length -= pageSize;
+			
+			var sig = this.generatePageSignal(partSig);						
+			signal = this.appendSignal(signal, sig);
+			signal = this.appendSignal(signal, this.silence(this.frameSetup.getSilenceBetweenPages()));
+
+		}
+		
+		signal = this.appendSignal(signal, this.makeRunCommand()); // send mc "start the application"
+		// added silence at sound end to time out sound fading in some wav players like from Mircosoft
+		
+		for(var k=0; k<10; k++)
+		{
+			signal = this.appendSignal(signal, this.silence(this.frameSetup.getSilenceBetweenPages()));
+		}
+				
 		return signal;
 };
 
