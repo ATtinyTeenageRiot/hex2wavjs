@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Hex2WavJS - Set EEPROM</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="tachyons.min.css">
+
+<body class="black washed-red Helvetica bg-light-yellow">
+    <header class="bg-hot-pink w-100 pv3-l pv3 pv2-ns ph3-m ph3-l">
+        <nav class="f6 fw6 ttu ">
+            <span class="link yellow dib mr3">Hex2wavJS</span>
+            <a class="link dim white dib mr3" href="index.html" title="Home">Upload Hex</a>
+            <a class="link dim white dib mr3" href="eeprom.html" title="About">Set EEPROM</a>
+            <a class="link dim white dib mr3" href="control.html" title="Store">Control Signal</a>
+        </nav>
+    </header>
+
+    <section class="center  w-50 pa2 pa2-ns bt b--black-10 black-70">
+
+        <div class="pv2">
+            Send EEPROM variable (8 bit)
+            <br/>var1: <input type="number" min="0" max="255" value="0" step="1" name="eepromVar1" id="eepromVar1">
+            <button type="button" id="sendEEPROM">Send EEPROM Signal</button>
+        </div>
+
+    </section>
+
+
+    <script src="js/hex2wav.js"></script>
+    
+    <script>
+    window.addEventListener('load', init, false);
+    function init() {
+        
+        var hex2wav = new Hex2wav();
+        
+        var sendToEEPROM = function (arr)
+        {
+            var signal = hex2wav.generateEEPROMSignal(arr);
+            hex2wav.playSignal(hex2wav.audioCtx, signal);
+        }
+
+        document.querySelector('#sendEEPROM').onclick = function () {
+            var var1 = parseInt(document.querySelector('#eepromVar1').value);
+            console.log(var1);
+            sendToEEPROM([var1]);
+        }
+
+
+    }
+    </script>
+
+</body>
+
+</html>

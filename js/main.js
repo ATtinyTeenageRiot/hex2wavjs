@@ -75,33 +75,4 @@ function init() {
 
     }
 
-    document.querySelector('#controlVar1').onchange= function(e) {
-
-        var var1 = parseInt(document.querySelector('#controlVar1').value);
-        var var2 = parseInt(document.querySelector('#controlVar2').value);
-
-        sendControl([var1, var2]);
-
-
-    }
-
-    document.querySelector('#controlVar2').onchange= function(e) {
-
-        var var1 = parseInt(document.querySelector('#controlVar1').value);
-        var var2 = parseInt(document.querySelector('#controlVar2').value);
-
-        sendControl([var1, var2]);
-
-
-    }
-    
-    document.querySelector('#sendControlSignal').onclick= function() {
-
-        var var1 = parseInt(document.querySelector('#controlVar1').value);
-        var var2 = parseInt(document.querySelector('#controlVar2').value);
-
-        sendControl([var1, var2]);
-
-
-    }
 }
