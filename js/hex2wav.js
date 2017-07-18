@@ -1,85 +1,4 @@
 
-function decodeHexFile(str) {
-    var res= [];
-    var eof= false;
-    var segment= 0;
-    var extended= 0;
-
-    function flatten(ary, ret) {
-        ret = ret === undefined ? [] : ret;
-        for (var i = 0; i < ary.length; i++) {
-            if (Array.isArray(ary[i])) {
-                flatten(ary[i], ret);
-            } else {
-                ret.push(ary[i]);
-            }
-        }
-        return ret;
-    }
-
-    function readLine(line, lineIndex) {
-        if(line[0]!==':') { //check start code
-            //console.log('read error: no colon at beginning of line');
-        } else {
-            var byteCount= parseInt(line.substr(1, 2), 16);
-            var address= parseInt(line.substr(3, 4), 16);
-            var recordType= parseInt(line.substr(7, 2), 16);
-            var data= [];
-            switch(recordType) {
-                case 0: //data
-                    for(var i= 0; i<byteCount; i++) {
-                        data.push(parseInt(line.substr(i*2+9, 2), 16));
-                    }
-                    break;
-                case 1: //end of file
-                    eof= true;
-                    break;
-                case 2: //extended segment address
-                    segment= parseInt(line.substr(9, 2), 16);
-                    break;
-                case 3: //start segment address
-                    //console.log('warning: Start Segment Address Record - not implemented');
-                    break;
-                case 4: //extended linear address
-                    extended= parseInt(line.substr(9, 2), 16);
-                    break;
-                case 5: //start linear address
-                    //console.log('warning: Start Linear Address Record - not implemented');
-                    break;
-                default:
-                    //console.log('read error: no matching record type');
-            }
-            var checksum= parseInt(line.substr(byteCount*2+9, 2), 16);
-            var sum= 0;
-            for(var i= 0; i<data.length; i++) {
-                sum= sum+data[i];
-            }
-            if(256-((byteCount+(address%255)+recordType+sum)&255)!=checksum) {
-                //console.log('checksum error in line '+lineIndex);
-                //document.querySelector('#error').innerHTML= 'checksum error in line'+lineIndex;
-            }
-            if(recordType!=1) {
-                var addy= segment*16+address;
-                addy= extended*65536+addy;
-                res.push(data)
-            }
-        }
-    }
-
-    var lines= str.split('\n');
-    for(var i= 0; i<lines.length; i++) {
-        var line= lines[i];
-        if(line.length>0) {
-            readLine(line, i);
-        }
-    }
-    if(!eof) {
-        console.log('read error: no end of file');
-    }
-    return flatten(res);
-}
-
-
 var HexToSignal = function (fullSpeedFlag) {
 
 	this.startSequencePulses = 40;
@@ -98,6 +17,7 @@ var HexToSignal = function (fullSpeedFlag) {
 	this.setSignalSpeed(fullSpeedFlag);
 	
 }
+
 
 HexToSignal.prototype.setSignalSpeed = function (fullSpeedFlag) {
 		if( fullSpeedFlag ) this.manchesterNumberOfSamplesPerBit = 4; // full speed
@@ -379,14 +299,23 @@ BootFrame.prototype.getSilenceBetweenPages = function () {
 
 
 
-var WavCodeGenerator = function () {
+var Hex2wav = function () {
 	this.sampleRate = 44100;		// Samples per second
 	this.fullSpeedFlag=true;
 
 	this.frameSetup = new BootFrame();
+
+    try {
+        window.AudioContext= window.AudioContext||window.webkitAudioContext;
+        this.audioCtx= new AudioContext();
+    }
+    catch(e) {
+        console('Web Audio API is not supported in this browser');
+	}
+	
 }
 
-WavCodeGenerator.prototype.appendSignal = function (sig1,  sig2) {
+Hex2wav.prototype.appendSignal = function (sig1,  sig2) {
 	var l1=sig1.length;
 	var l2=sig2.length;
 	var d=new Array(l1+l2);
@@ -395,11 +324,11 @@ WavCodeGenerator.prototype.appendSignal = function (sig1,  sig2) {
 	return d;
 };
 
-WavCodeGenerator.prototype.setSignalSpeed = function (fullSpeedFlag) {
+Hex2wav.prototype.setSignalSpeed = function (fullSpeedFlag) {
 	this.fullSpeedFlag = fullSpeedFlag;
 };
 
-WavCodeGenerator.prototype.generatePageSignal = function (data) {
+Hex2wav.prototype.generatePageSignal = function (data) {
 		var h2s=new HexToSignal(this.fullSpeedFlag);
 		var frameData=new Array(this.frameSetup.getFrameSize());
 
@@ -417,7 +346,7 @@ WavCodeGenerator.prototype.generatePageSignal = function (data) {
 		return signal;
 };
 
-WavCodeGenerator.prototype.silence = function (duration) {
+Hex2wav.prototype.silence = function (duration) {
 		var signal=new Array(duration * this.sampleRate);
 		for (var i = 0; i < signal.length; i++) {
 			signal[i] = 0;
@@ -425,7 +354,7 @@ WavCodeGenerator.prototype.silence = function (duration) {
 		return signal;
 };
 
-WavCodeGenerator.prototype.makeRunCommand = function () {
+Hex2wav.prototype.makeRunCommand = function () {
 		var h2s=new HexToSignal(this.fullSpeedFlag);
 		var frameData=new Array(this.frameSetup.getFrameSize());
 		this.frameSetup.setRunCommand();
@@ -434,7 +363,7 @@ WavCodeGenerator.prototype.makeRunCommand = function () {
 		return signal;
 };
 
-WavCodeGenerator.prototype.makeTestCommand = function () {
+Hex2wav.prototype.makeTestCommand = function () {
 		var h2s=new HexToSignal(this.fullSpeedFlag);
 		var frameData=new Array(this.frameSetup.getFrameSize());
 		this.frameSetup.setTestCommand();
@@ -445,7 +374,7 @@ WavCodeGenerator.prototype.makeTestCommand = function () {
 
 
 
-WavCodeGenerator.prototype.generateEEPROMSignal = function (data) {
+Hex2wav.prototype.generateEEPROMSignal = function (data) {
 		var signal = [];
 		this.frameSetup.setEEPROMCommand(); // we want to programm the mc
 		var pageSize = this.frameSetup.getPageSize();
@@ -494,7 +423,7 @@ WavCodeGenerator.prototype.generateEEPROMSignal = function (data) {
 		return signal;
 };
 
-WavCodeGenerator.prototype.generateSignal = function (data) {
+Hex2wav.prototype.generateProgrammingSignal = function (data) {
 		var signal= [];
 		this.frameSetup.setProgCommand(); // we want to programm the mc
 		var pl=this.frameSetup.getPageSize();
@@ -519,12 +448,11 @@ WavCodeGenerator.prototype.generateSignal = function (data) {
 
 			var sig=this.generatePageSignal(partSig);
 
-			console.log('tot' + total);
-			for(var n=0;n<sig.length;n++)
-			{
-				// console.log(sig[n]);
-			}
-
+			// console.log('tot' + total);
+			// for(var n=0;n<sig.length;n++)
+			// {
+			// 	// console.log(sig[n]);
+			// }
 						
 			signal=this.appendSignal(signal,sig);
 			signal=this.appendSignal(signal,this.silence(this.frameSetup.getSilenceBetweenPages()));
@@ -543,7 +471,7 @@ WavCodeGenerator.prototype.generateSignal = function (data) {
 		return signal;
 };
 
-WavCodeGenerator.prototype.generateControlSignal = function (inputData) {
+Hex2wav.prototype.generateControlSignal = function (inputData) {
 		
 		var manchesterPhase = 127;    // current phase for differential manchester coding
 		var manchesterNumberOfSamplesPerBit = 4; 
@@ -574,7 +502,7 @@ WavCodeGenerator.prototype.generateControlSignal = function (inputData) {
 
 }
 
-WavCodeGenerator.prototype.playSignal = function (audioCtx, signal) {
+Hex2wav.prototype.playSignal = function (audioCtx, signal) {
         var frameCount	= signal.length;       
         var audio_buffer = audioCtx.createBuffer(1, frameCount, audioCtx.sampleRate);
 
@@ -587,4 +515,86 @@ WavCodeGenerator.prototype.playSignal = function (audioCtx, signal) {
         src.buffer= audio_buffer;
         src.connect(audioCtx.destination);
         src.start();
+};
+
+
+Hex2wav.prototype.decodeHexFile = function (str) 
+{
+    var res= [];
+    var eof= false;
+    var segment= 0;
+    var extended= 0;
+
+    function flatten(ary, ret) {
+        ret = ret === undefined ? [] : ret;
+        for (var i = 0; i < ary.length; i++) {
+            if (Array.isArray(ary[i])) {
+                flatten(ary[i], ret);
+            } else {
+                ret.push(ary[i]);
+            }
+        }
+        return ret;
+    }
+
+    function readLine(line, lineIndex) {
+        if(line[0]!==':') { //check start code
+            //console.log('read error: no colon at beginning of line');
+        } else {
+            var byteCount= parseInt(line.substr(1, 2), 16);
+            var address= parseInt(line.substr(3, 4), 16);
+            var recordType= parseInt(line.substr(7, 2), 16);
+            var data= [];
+            switch(recordType) {
+                case 0: //data
+                    for(var i= 0; i<byteCount; i++) {
+                        data.push(parseInt(line.substr(i*2+9, 2), 16));
+                    }
+                    break;
+                case 1: //end of file
+                    eof= true;
+                    break;
+                case 2: //extended segment address
+                    segment= parseInt(line.substr(9, 2), 16);
+                    break;
+                case 3: //start segment address
+                    //console.log('warning: Start Segment Address Record - not implemented');
+                    break;
+                case 4: //extended linear address
+                    extended= parseInt(line.substr(9, 2), 16);
+                    break;
+                case 5: //start linear address
+                    //console.log('warning: Start Linear Address Record - not implemented');
+                    break;
+                default:
+                    //console.log('read error: no matching record type');
+            }
+            var checksum= parseInt(line.substr(byteCount*2+9, 2), 16);
+            var sum= 0;
+            for(var i= 0; i<data.length; i++) {
+                sum= sum+data[i];
+            }
+            if(256-((byteCount+(address%255)+recordType+sum)&255)!=checksum) {
+                //console.log('checksum error in line '+lineIndex);
+                //document.querySelector('#error').innerHTML= 'checksum error in line'+lineIndex;
+            }
+            if(recordType!=1) {
+                var addy= segment*16+address;
+                addy= extended*65536+addy;
+                res.push(data)
+            }
+        }
+    }
+
+    var lines= str.split('\n');
+    for(var i= 0; i<lines.length; i++) {
+        var line= lines[i];
+        if(line.length>0) {
+            readLine(line, i);
+        }
+    }
+    if(!eof) {
+        console.log('read error: no end of file');
+    }
+    return flatten(res);
 };
