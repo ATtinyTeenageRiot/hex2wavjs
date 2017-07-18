@@ -1,8 +1,7 @@
 
 # Hex2WavJS
 
-javascript library for interacting with [TinyAudioBoot](https://github.com/ATtinyTeenageRiot/TinyAudioBoot/) 
-
+Javascript library for interacting with [TinyAudioBoot](https://github.com/ATtinyTeenageRiot/TinyAudioBoot/) and [8BitMixtapeNEO](https://github.com/8BitMixtape/8Bit-Mixtape-NEO)
 # Usage
 
 
