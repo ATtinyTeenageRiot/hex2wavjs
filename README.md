@@ -1,7 +1,7 @@
 
 # Hex2WavJS
 
-javascript library for interacting with [TinyAudioBoot](https://github.com/ChrisMicro/TinyAudioBoot/) 
+javascript library for interacting with [TinyAudioBoot](https://github.com/ATtinyTeenageRiot/TinyAudioBoot/) 
 
 # Usage
 
