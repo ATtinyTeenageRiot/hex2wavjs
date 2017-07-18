@@ -34,6 +34,6 @@ hex2wav.playSignal(hex2wav.audioCtx, sig);
 
 # Credit
 
-* Budi Prakosa - Port of Chris code to JS
-* ChrisMicro - Original Hex2Wav Java code
-* Frederik Olofsson - Hex file decoder code
+* [Budi Prakosa](http://manticore.id) - Port of Chris code to JS
+* [ChrisMicro](https://github.com/ChrisMicro) - Original Hex2Wav Java code
+* [Frederik Olofsson](http://www.fredrikolofsson.com) - Hex file decoder code
