@@ -5,81 +5,116 @@
 <link rel="stylesheet" href="tachyons.min.css">
 
 <body class="black washed-red Helvetica bg-light-yellow">
-    <header class="bg-hot-pink w-100 pv3-l pv3 pv2-ns ph3-m ph3-l">
-        <nav class="f6 fw6 ttu ">
-            <span class="link yellow dib mr3">Hex2wavJS</span>
-            <a class="link dim white dib mr3" href="index.html" title="Home">Upload Hex</a>
-            <a class="link dim white dib mr3" href="eeprom.html" title="About">Set EEPROM</a>
-            <a class="link dim white dib mr3" href="control.html" title="Store">Control Signal</a>
-            <a class="link dim white dib mr3" href="sequencer.html" title="Store">Sequencer</a>            
-        </nav>
-    </header>
+  <header class="bg-hot-pink w-100 pv3-l pv3 pv2-ns ph3-m ph3-l">
+    <nav class="f6 fw6 ttu ">
+      <span class="link yellow dib mr3">Hex2wavJS</span>
+      <a class="link dim white dib mr3" href="index.html" title="Home">Upload Hex</a>
+      <a class="link dim white dib mr3" href="eeprom.html" title="About">Set EEPROM</a>
+      <a class="link dim white dib mr3" href="control.html" title="Store">Control Signal</a>
+      <a class="link dim white dib mr3" href="sequencer.html" title="Store">Sequencer</a>
+    </nav>
+  </header>
 
-    <section class="center  w-80 pa2 pa2-ns bt b--black-10 black-70">
+  <section class="center  w-80 pa2 pa2-ns bt b--black-10 black-70">
 
-                    <h1 class="lh-title">Hex2WavJS - Sequencer</h1>
-   <div class="cf w-100 bg-yellow">
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    1
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-10">
-    2
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    3
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-10">
-    4
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    5
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    6
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    7
-  </div>
-  <div style="width: 12.5%" class="fl tc pv5 bg-black-05">
-    8
-  </div>
-</div>
+    <h1 class="lh-title">Hex2WavJS - StepSequencer</h1>
+    <div class="cf ba w-100 bg-yellow">
+      <div style="width: 12.5%" track="1" step="0" onclick="setStep(this)" class="fl tc br pv5">
+        1
+      </div>
+      <div style="width: 12.5%" track="1" step="1" onclick="setStep(this)" class="fl tc br pv5">
+        2
+      </div>
+      <div style="width: 12.5%" track="1" step="2" onclick="setStep(this)" class="fl tc br pv5">
+        3
+      </div>
+      <div style="width: 12.5%" track="1" step="3" onclick="setStep(this)" class="fl tc br pv5">
+        4
+      </div>
+      <div style="width: 12.5%" track="1" step="4" onclick="setStep(this)" class="fl tc br pv5">
+        5
+      </div>
+      <div style="width: 12.5%" track="1" step="5" onclick="setStep(this)" class="fl tc br pv5">
+        6
+      </div>
+      <div style="width: 12.5%" track="1" step="6" onclick="setStep(this)" class="fl tc br pv5">
+        7
+      </div>
+      <div style="width: 12.5%" track="1" step="7" onclick="setStep(this)" class="fl tc pv5">
+        8
+      </div>
+    </div>
 
-        <div class="pv2">
+    <div class="pv2">
 
-            <br/>var1: <input class="input-reset ba b--black-20 pa2 mb2 db w-100"  type="number" min="0" max="255" value="0" step="1" name="eepromVar1" id="eepromVar1">
-            <br/>var2: <input class="input-reset ba b--black-20 pa2 mb2 db w-100"  type="number" min="0" max="255" value="0" step="1" name="eepromVar2" id="eepromVar2">
-            <br/>var3: <input class="input-reset ba b--black-20 pa2 mb2 db w-100"  type="number" min="0" max="255" value="0" step="1" name="eepromVar3" id="eepromVar3">
+      <br/>Parameter 1: <input class="input-reset ba b--black-20 pa2 mb2 db w-100" type="number" min="0" max="255" value="0" step="1"
+        name="eepromVar1" id="eepromVar1">
+      <br/>Parameter 2: <input class="input-reset ba b--black-20 pa2 mb2 db w-100" type="number" min="0" max="255" value="0" step="1"
+        name="eepromVar2" id="eepromVar2">
+      <br/>Parameter 3: <input class="input-reset ba b--black-20 pa2 mb4 db w-100" type="number" min="0" max="255" value="0" step="1"
+        name="eepromVar3" id="eepromVar3">
 
-            <button class="b ph3 pv2 input-reset ba b--black dim bg-transparent pointer f6 dib" type="button" id="sendEEPROM">Upload settings!</button>
-        </div>
+      <button class="b ph5 pv2 input-reset ba b--black dim bg-transparent pointer f6 dib" type="button" id="sendEEPROM">Set step sequencer!</button>
+    </div>
 
-    </section>
+  </section>
 
 
-    <script src="js/hex2wav.js"></script>
-    
-    <script>
+  <script src="js/hex2wav.js"></script>
+
+  <script>
+
+    var pattern = [false, false, false ,false, false, false, false, false];
+
+    var tx_pattern = 0;
+    var tx_var1 = 0;
+    var tx_var2 = 0;
+    var tx_var3 = 0;
+
+    var convertPat = function(item) {
+      if (item === false)
+      {
+        return 0;
+      }else{
+        return 1;
+      }
+    }
+      
+    var setStep = function(self)
+    {
+      var step = self.getAttribute('step')
+      var track = self.getAttribute('track')
+      pattern[step] = !pattern[step];
+      if(pattern[step]){
+              self.setAttribute("style", "width: 12.5%; background-color: red");
+      }else{
+              self.setAttribute("style", "width: 12.5%; background-color: gold");
+      }
+      var pattern_bin = (pattern.map(convertPat).join(''));
+      var result = parseInt( pattern_bin, 2 );
+      tx_pattern = (result);
+    }
+
     window.addEventListener('load', init, false);
     function init() {
+      var hex2wav = new Hex2wav();
+      var sendToEEPROM = function (arr) {
+        var signal = hex2wav.generateEEPROMSignal(arr);
+        hex2wav.playSignal(hex2wav.audioCtx, signal);
+      }
+      document.querySelector('#sendEEPROM').onclick = function () {
+        var tx_var1 = parseInt(document.querySelector('#eepromVar1').value);
+        var tx_var2 = parseInt(document.querySelector('#eepromVar2').value);
+        var tx_var3 = parseInt(document.querySelector('#eepromVar3').value);
         
-        var hex2wav = new Hex2wav();
-        
-        var sendToEEPROM = function (arr)
-        {
-            var signal = hex2wav.generateEEPROMSignal(arr);
-            hex2wav.playSignal(hex2wav.audioCtx, signal);
-        }
+        console.log([tx_pattern, tx_var1, tx_var2, tx_var3]);
 
-        document.querySelector('#sendEEPROM').onclick = function () {
-            var var1 = parseInt(document.querySelector('#eepromVar1').value);
-            console.log(var1);
-            sendToEEPROM([var1]);
-        }
+        sendToEEPROM([tx_pattern, tx_var1, tx_var2, tx_var3]);
+      }
 
 
     }
-    </script>
+  </script>
 
 </body>
 
